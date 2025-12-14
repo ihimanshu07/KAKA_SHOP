@@ -1,0 +1,14 @@
+## dashboard 
+- data table 
+- sooner 
+- skeleton  : when the data isn't loaded ! 
+- Combobox (responsive) to category input !
+- Avatar adjacent to user name 
+
+
+
+## laoder 
+- Progress 
+
+## landing page 
+- hover card 
