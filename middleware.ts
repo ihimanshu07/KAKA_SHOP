@@ -4,15 +4,16 @@ import { NextResponse } from "next/server";
 export default withAuth(
   function middleware(req) {
     const token = req.nextauth.token;
-    const isAuthPage = req.nextUrl.pathname === "/login" || req.nextUrl.pathname === "/";
+    const isPublicPage = req.nextUrl.pathname === "/login" || req.nextUrl.pathname === "/" || req.nextUrl.pathname === "/form";
     
-    // If user is authenticated and trying to access login or home page, redirect to dashboard
-    if (token && (req.nextUrl.pathname === "/login" || req.nextUrl.pathname === "/")) {
+    // If user is authenticated and trying to access home page, redirect to dashboard
+    // (Don't redirect from /login - let the login page handle onboarding logic)
+    if (token && req.nextUrl.pathname === "/") {
       return NextResponse.redirect(new URL("/dashboard", req.url));
     }
     
     // If user is not authenticated and trying to access protected route, redirect to login
-    if (!token && !isAuthPage && !req.nextUrl.pathname.startsWith("/api")) {
+    if (!token && !isPublicPage && !req.nextUrl.pathname.startsWith("/api")) {
       return NextResponse.redirect(new URL("/login", req.url));
     }
     

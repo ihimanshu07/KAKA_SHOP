@@ -1,7 +1,7 @@
 "use client";
-import { signIn, signOut, useSession } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -10,14 +10,19 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Chrome } from "lucide-react";
+import { Chrome, Loader2 } from "lucide-react";
 
 export default function LoginPage() {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const router = useRouter();
+  const [isChecking, setIsChecking] = useState(false);
+  const hasRedirected = useRef(false);
 
   useEffect(() => {
-    if (session?.user?.email) {
+    // Only check if session is authenticated (not loading) and haven't redirected yet
+    if (status === "authenticated" && session?.user?.email && !hasRedirected.current) {
+      hasRedirected.current = true;
+      setIsChecking(true);
       async function checkExistingUser() {
         try {
           const response = await fetch("/api/exsistinguser", {
@@ -25,13 +30,12 @@ export default function LoginPage() {
             headers: {
               "Content-Type": "application/json",
             },
-            credentials: "include", // Ensure cookies are sent
+            credentials: "include",
           });
           
           if (!response.ok) {
             console.error("API error:", response.status, response.statusText);
-            // If unauthorized or error, redirect to form for onboarding
-            window.location.href = "/form";
+            router.replace("/form");
             return;
           }
           
@@ -41,26 +45,32 @@ export default function LoginPage() {
           // If user exists and has completed onboarding, go to dashboard
           // Otherwise (user doesn't exist or onboarding incomplete), go to form
           if (data && data.onboading === true) {
-            window.location.href = "/dashboard";
+            router.replace("/dashboard");
           } else {
-            window.location.href = "/form";
+            router.replace("/form");
           }
         } catch (error) {
           console.error("Error checking existing user:", error);
-          // On error, redirect to form
-          window.location.href = "/form";
+          router.replace("/form");
+        } finally {
+          setIsChecking(false);
         }
       }
-      // Small delay to ensure session is fully established
-      const timer = setTimeout(() => {
-        checkExistingUser();
-      }, 100);
-      return () => clearTimeout(timer);
+      checkExistingUser();
     }
-  }, [session]);
+  }, [session, status, router]);
 
-  if (session) {
-    return null;
+  // Show loading state while checking session or redirecting
+  if (status === "loading" || isChecking || status === "authenticated") {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-muted/20 p-4">
+        <Card className="w-full max-w-md shadow-lg">
+          <CardContent className="flex items-center justify-center py-8">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
   return (
