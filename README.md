@@ -181,42 +181,39 @@ For more details, check out the [Next.js deployment documentation](https://nextj
 
 ### AI Tools Used
 
-Throughout the development of this project, I utilized **Cursor AI** (powered by Claude) as my primary AI coding assistant.
+Throughout the development of this project, I utilized **Cursor** and **ChatGPT** as my primary AI coding assistants.
 
 ### How I Used AI
 
-1. **Initial Project Setup**: I used Cursor AI to generate the initial boilerplate code for the Next.js application structure, including the App Router setup and basic configuration files.
+1. **Project Structure and Brainstorming**: Prior to coding, I used ChatGPT to brainstorm and prepare the overall structure of the project. This included planning the architecture, deciding on the tech stack, and outlining the feature set before diving into implementation.
 
-2. **API Endpoint Development**: I leveraged AI assistance to generate the initial structure for API routes, including:
-   - Authentication endpoints (`/api/auth/[...nextauth]`)
-   - Sweet inventory management endpoints (`/api/sweets`)
-   - User management endpoints (`/api/user`)
-   - Purchase and restock endpoints
+2. **shadcn/ui and Tailwind CSS Implementation**: I used Cursor to help implement shadcn/ui components and Tailwind CSS styling throughout the application. The AI assistant provided guidance on:
+   - Setting up and configuring shadcn/ui components
+   - Implementing responsive layouts with Tailwind CSS
+   - Creating consistent UI components and styling patterns
+   - Troubleshooting styling issues and component integration
 
-3. **Component Generation**: AI helped generate boilerplate code for React components, particularly the UI components from shadcn/ui and custom components like forms, cards, and accordions.
-
-4. **Database Schema Design**: I used AI to help brainstorm and refine the Prisma schema structure for User and Sweet models, ensuring proper relationships and field types.
-
-5. **Authentication Implementation**: AI assisted in setting up NextAuth.js configuration with Google OAuth provider, including the proper callback handling and session management.
-
-6. **JWT Implementation**: I used AI to generate the initial JWT utility functions for token creation and verification, which were then manually refined with proper error handling and validation.
-
-7. **Code Refactoring**: Throughout development, I used AI to suggest improvements, refactor code for better maintainability, and fix common bugs.
-
-8. **Documentation**: AI helped generate initial documentation structure and code comments, which I then customized to match the project's specific needs.
+3. **JWT Flow Implementation**: I leveraged Cursor to implement the JWT (JSON Web Token) authentication and authorization flow. This included:
+   - Setting up JWT token generation and verification utilities
+   - Implementing JWT middleware for protecting API routes
+   - Configuring token-based authentication flow
+   - Handling token refresh and validation logic
 
 ### Reflection on AI Impact
 
-Using Cursor AI significantly accelerated my development workflow. The AI assistant was particularly valuable for:
+Using Cursor and ChatGPT significantly enhanced my development workflow in several ways:
 
-- **Rapid Prototyping**: Generating boilerplate code allowed me to focus on implementing business logic rather than setting up infrastructure.
-- **Learning New Technologies**: When working with Next.js 16 App Router, NextAuth.js, and Prisma, AI provided contextual examples and explanations that helped me understand best practices.
-- **Error Resolution**: AI quickly identified common issues and suggested fixes, reducing debugging time.
-- **Code Consistency**: The AI helped maintain consistent coding patterns and styles across the project.
+- **Planning and Architecture**: ChatGPT was invaluable during the initial brainstorming phase, helping me think through the project structure and make informed decisions about technology choices before writing any code. This upfront planning saved time and reduced refactoring later.
 
-However, I found that AI-generated code often required manual refinement:
-- **Security Considerations**: I had to manually add validation logic, input sanitization, and proper error handling.
-- **Business Logic**: The core business logic, such as role-based access control and inventory management rules, required careful manual implementation.
-- **Testing**: AI-generated code needed thorough testing and edge case handling.
+- **UI/UX Development**: Cursor's assistance with shadcn/ui and Tailwind CSS implementation accelerated the UI development process. The AI helped me quickly understand component APIs, implement responsive designs, and maintain consistent styling patterns across the application.
 
-Overall, AI served as an excellent pair programming partner, handling repetitive tasks and providing suggestions, while I focused on the critical aspects of security, business logic, and user experience. The combination of AI assistance and manual refinement resulted in a more efficient development process without compromising code quality.
+- **Complex Implementation**: For the JWT flow, Cursor provided step-by-step guidance on implementing secure authentication patterns, which helped me avoid common security pitfalls and implement best practices from the start.
+
+- **Learning and Problem-Solving**: Both tools served as excellent learning resources, providing explanations and examples that helped me understand new concepts and solve problems more efficiently.
+
+However, I found that AI assistance worked best when combined with my own understanding and critical thinking:
+- **Code Review**: I always reviewed and tested AI-generated code to ensure it met my specific requirements and security standards.
+- **Customization**: While AI provided excellent starting points, I often needed to customize the code to fit the project's specific business logic and requirements.
+- **Best Practices**: I used AI suggestions as a foundation but applied my own knowledge of security, performance, and maintainability to refine the implementation.
+
+Overall, AI tools served as powerful assistants that accelerated development while allowing me to maintain control over code quality and project direction. The combination of AI assistance for repetitive tasks and complex implementations, along with manual refinement for business logic and security, resulted in a more efficient and effective development process.
