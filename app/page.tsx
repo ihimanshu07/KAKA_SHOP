@@ -26,15 +26,20 @@ export default function Home() {
           </p>
 
           <div className="flex gap-4 justify-center pt-4">
-            <Button asChild size="lg">
-              <Link href="/login">
+            <Button asChild size="lg" className="flex items-center">
+              <Link href="/login" className="flex items-center">
                 Get Started
-                <ExternalLink className="ml-2 h-4 w-4" />
+                <ExternalLink className="ml-2 h-3 w-3 align-middle" />
               </Link>
             </Button>
-            <Button asChild variant="outline" size="lg">
-              <a href="https://github.com" target="_blank" rel="noopener noreferrer">
-                <Github className="mr-2 h-4 w-4" />
+            <Button asChild variant="outline" size="lg" className="flex items-center">
+              <a
+                href="https://github.com/ihimanshu07/KAKA_SHOP.git"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center"
+              >
+                <Github className="mr-2 h-3 w-3 align-middle" />
                 View on GitHub
               </a>
             </Button>
