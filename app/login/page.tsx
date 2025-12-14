@@ -17,27 +17,47 @@ export default function LoginPage() {
   const router = useRouter();
 
   useEffect(() => {
-    if (session) {
+    if (session?.user?.email) {
       async function checkExistingUser() {
-        const response = await fetch("/api/exsistinguser", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-         
-        });
-        const data = await response.json();
-        console.log("Response data:", data);
-        if (data?.onboading) {
-          router.push("/dashboard");
-        } else {
-          router.push("/form");
+        try {
+          const response = await fetch("/api/exsistinguser", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            credentials: "include", // Ensure cookies are sent
+          });
+          
+          if (!response.ok) {
+            console.error("API error:", response.status, response.statusText);
+            // If unauthorized or error, redirect to form for onboarding
+            window.location.href = "/form";
+            return;
+          }
+          
+          const data = await response.json();
+          console.log("Response data:", data);
+          
+          // If user exists and has completed onboarding, go to dashboard
+          // Otherwise (user doesn't exist or onboarding incomplete), go to form
+          if (data && data.onboading === true) {
+            window.location.href = "/dashboard";
+          } else {
+            window.location.href = "/form";
+          }
+        } catch (error) {
+          console.error("Error checking existing user:", error);
+          // On error, redirect to form
+          window.location.href = "/form";
         }
       }
-      checkExistingUser();
-     
+      // Small delay to ensure session is fully established
+      const timer = setTimeout(() => {
+        checkExistingUser();
+      }, 100);
+      return () => clearTimeout(timer);
     }
-  }, [session, router]);
+  }, [session]);
 
   if (session) {
     return null;
