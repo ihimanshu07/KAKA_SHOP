@@ -16,17 +16,17 @@ export function HoverCardComponent() {
   return (
     <HoverCard>
       <HoverCardTrigger asChild>
-        <Button variant="link" className="text-primary font-semibold">vishal</Button>
+        <Button variant="link" className="text-primary font-semibold">GAURAV</Button>
       </HoverCardTrigger>
       <HoverCardContent className="w-80">
         <div className="flex justify-between gap-4">
           <Avatar>
-            <AvatarImage src="https://github.com/vishal.png" />
-            <AvatarFallback>VH</AvatarFallback>
+            <AvatarImage src="/LEWIS.jpg" />
+            <AvatarFallback>GAURAV</AvatarFallback>
           </Avatar>
           <div className="space-y-2 flex-1">
             <div>
-              <h4 className="text-sm font-semibold">Vishal</h4>
+              <h4 className="text-sm font-semibold">GAURAV</h4>
               <p className="text-xs text-muted-foreground">Developer & Creator</p>
             </div>
             <p className="text-sm text-muted-foreground">
@@ -35,7 +35,7 @@ export function HoverCardComponent() {
             </p>
             <div className="flex items-center gap-2 pt-2">
               <a 
-                href="https://github.com/vishal" 
+                href="https://github.com/ihimanshu07" 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="text-xs text-primary hover:underline flex items-center gap-1"
@@ -46,7 +46,7 @@ export function HoverCardComponent() {
             </div>
             <div className="text-muted-foreground text-xs flex items-center gap-1">
               <CalendarIcon className="h-3 w-3" />
-              Project started 2024
+              Project started December 2025
             </div>
           </div>
         </div>

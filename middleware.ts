@@ -7,6 +7,10 @@ export default withAuth(
       return NextResponse.next();
     }
     
+    if (req.nextUrl.pathname === "/") {
+      return NextResponse.next();
+    }
+    
     if (req.nextUrl.pathname === "/login") {
       return NextResponse.next();
     }
@@ -20,6 +24,10 @@ export default withAuth(
           return true;
         }
         
+        if (req.nextUrl.pathname === "/") {
+          return true;
+        }
+        
         if (req.nextUrl.pathname === "/login") {
           return true;
         }
@@ -28,7 +36,7 @@ export default withAuth(
       },
     },
     pages: {
-      signIn: "/login",
+      signIn: "/",
     },
   }
 );
