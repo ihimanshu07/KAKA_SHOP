@@ -3,16 +3,17 @@ import { NextResponse } from "next/server";
 
 export default withAuth(
   function middleware(req) {
-    if (req.nextUrl.pathname.startsWith("/api")) {
-      return NextResponse.next();
+    const token = req.nextauth.token;
+    const isAuthPage = req.nextUrl.pathname === "/login" || req.nextUrl.pathname === "/";
+    
+    // If user is authenticated and trying to access login or home page, redirect to dashboard
+    if (token && (req.nextUrl.pathname === "/login" || req.nextUrl.pathname === "/")) {
+      return NextResponse.redirect(new URL("/dashboard", req.url));
     }
     
-    if (req.nextUrl.pathname === "/") {
-      return NextResponse.next();
-    }
-    
-    if (req.nextUrl.pathname === "/login") {
-      return NextResponse.next();
+    // If user is not authenticated and trying to access protected route, redirect to login
+    if (!token && !isAuthPage && !req.nextUrl.pathname.startsWith("/api")) {
+      return NextResponse.redirect(new URL("/login", req.url));
     }
     
     return NextResponse.next();
@@ -20,6 +21,7 @@ export default withAuth(
   {
     callbacks: {
       authorized: ({ token, req }) => {
+        // Allow access to public routes
         if (req.nextUrl.pathname.startsWith("/api")) {
           return true;
         }
@@ -32,11 +34,12 @@ export default withAuth(
           return true;
         }
         
+        // Require authentication for all other routes
         return !!token;
       },
     },
     pages: {
-      signIn: "/",
+      signIn: "/login",
     },
   }
 );
