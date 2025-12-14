@@ -210,4 +210,4 @@ Overall, AI tools served as powerful assistants that accelerated development whi
 
 
 # Gaurav Singh 
-### Portfolio : https://gauravsingh.info
+### Portfolio : www.gauravsingh.info
