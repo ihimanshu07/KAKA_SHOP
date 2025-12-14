@@ -2,7 +2,7 @@ import prisma from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../auth/[...nextauth]/route";
-import { generateToken } from "@/lib/jwt";
+import { generateToken, setJWTCookie } from "@/lib/jwt";
 
 export async function POST(request: Request) {
   try {
@@ -94,14 +94,8 @@ export async function POST(request: Request) {
    // Create response with user data
    const response = NextResponse.json(user);
    
-   // Set JWT token as cookie
-   response.cookies.set("jwt_token", token, {
-     httpOnly: true,
-     secure: process.env.NODE_ENV === "production",
-     sameSite: "lax",
-     maxAge: 60 * 60 * 24 * 7, // 7 days
-     path: "/",
-   });
+   // Set JWT token as cookie using utility function
+   setJWTCookie(response, token);
 
    return response;
   } catch (error: any) {
