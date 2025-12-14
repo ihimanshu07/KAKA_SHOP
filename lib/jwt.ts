@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 import { NextResponse } from "next/server";
 
-const JWT_SECRET = process.env.NEXT_JWT_SECRET;
+const JWT_SECRET = process.env.NEXT_JWT_SECRET!;
 
 if (!JWT_SECRET) {
   throw new Error("NEXT_JWT_SECRET environment variable is not set. Please set it in your Vercel environment variables.");
@@ -48,8 +48,17 @@ export function setJWTCookie(response: NextResponse, token: string): void {
  */
 export function verifyToken(token: string): JWTPayload | null {
   try {
-    const decoded = jwt.verify(token, JWT_SECRET) as JWTPayload;
-    return decoded;
+    const decoded = jwt.verify(token, JWT_SECRET);
+    
+    // Type guard to ensure decoded token has the expected structure
+    if (typeof decoded === "object" && decoded !== null && "id" in decoded && "role" in decoded) {
+      return {
+        id: decoded.id as string,
+        role: decoded.role as string,
+      };
+    }
+    
+    return null;
   } catch (error) {
     console.error("JWT verification error:", error);
     return null;
