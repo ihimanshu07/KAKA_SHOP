@@ -70,12 +70,7 @@ cd shop-manager-master
 
 ```bash
 npm install
-# or
-yarn install
-# or
-pnpm install
-# or
-bun install
+
 ```
 
 ### 3. Set Up Environment Variables
@@ -106,12 +101,7 @@ npx prisma generate
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+
 ```
 
 Open [http://localhost:3000](http://localhost:3000) in your browser to see the application.
@@ -217,3 +207,7 @@ However, I found that AI assistance worked best when combined with my own unders
 - **Best Practices**: I used AI suggestions as a foundation but applied my own knowledge of security, performance, and maintainability to refine the implementation.
 
 Overall, AI tools served as powerful assistants that accelerated development while allowing me to maintain control over code quality and project direction. The combination of AI assistance for repetitive tasks and complex implementations, along with manual refinement for business logic and security, resulted in a more efficient and effective development process.
+
+
+# Gaurav Singh 
+### Portfolio : https://gauravsingh.info
