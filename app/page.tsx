@@ -180,8 +180,8 @@ export default function Home() {
           <ul className="my-6 ml-6 list-disc space-y-2 [&>li]:mt-2">
             <li>
               <strong>GitHub Repository:</strong>{" "}
-              <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
-                github.com/shop-manager
+              <a href="https://github.com/ihimanshu07/KAKA_SHOP" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                github.com/https://github.com/ihimanshu07/KAKA_SHOP
               </a>
             </li>
             <li>
