@@ -33,14 +33,18 @@ export function FORM({ value, onValueChange }: FormProps) {
   
   return (
     <Select value={role} onValueChange={handleValueChange}>
-      <SelectTrigger className="w-[180px]">
+      <SelectTrigger className="w-full h-11 transition-all duration-300 hover:border-primary/50 focus:ring-2 focus:ring-primary/20">
         <SelectValue placeholder="Select Role" />
       </SelectTrigger>
-      <SelectContent>
+      <SelectContent className="animate-scale-in">
         <SelectGroup>
           <SelectLabel>Role</SelectLabel>
-          <SelectItem value="ADMIN">ADMIN</SelectItem>
-          <SelectItem value="USER">USER</SelectItem>
+          <SelectItem value="ADMIN" className="cursor-pointer hover:bg-accent transition-colors">
+            ADMIN
+          </SelectItem>
+          <SelectItem value="USER" className="cursor-pointer hover:bg-accent transition-colors">
+            USER
+          </SelectItem>
         </SelectGroup>
       </SelectContent>
     </Select>

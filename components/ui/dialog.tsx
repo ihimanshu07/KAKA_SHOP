@@ -18,7 +18,7 @@ const Dialog = ({ open, onOpenChange, children }: DialogProps) => {
       className="fixed inset-0 z-50 flex items-center justify-center"
       onClick={() => onOpenChange?.(false)}
     >
-      <div className="fixed inset-0 bg-black/50" />
+      <div className="fixed inset-0 bg-black/60" />
       <div
         className="relative z-50 w-full max-w-lg mx-4"
         onClick={(e) => e.stopPropagation()}
@@ -38,7 +38,7 @@ const DialogContent = React.forwardRef<
   <div
     ref={ref}
     className={cn(
-      "relative bg-card text-card-foreground shadow-lg rounded-lg border p-6",
+      "relative bg-white text-black border-[3px] border-black p-6 neobrutalism-shadow-lg",
       className
     )}
     {...props}
@@ -47,7 +47,7 @@ const DialogContent = React.forwardRef<
       <Button
         variant="ghost"
         size="icon"
-        className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none"
+        className="absolute right-4 top-4 border-0 hover:bg-[#FF6B6B] hover:text-white font-black"
         onClick={onClose}
       >
         <X className="h-4 w-4" />

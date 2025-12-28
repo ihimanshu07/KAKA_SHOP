@@ -41,6 +41,8 @@ import {
   Trash2,
   Check,
   ArrowUp,
+  TrendingUp,
+  Filter,
 } from "lucide-react";
 
 interface Sweet {
@@ -73,7 +75,6 @@ export default function Dashboard() {
     maxPrice: "",
   });
 
-  // Form state
   const [formData, setFormData] = useState({
     name: "",
     category: "",
@@ -81,7 +82,6 @@ export default function Dashboard() {
     quantity: "",
   });
 
-  // Purchase state - track which sweets are in purchase mode and their quantities
   const [purchaseMode, setPurchaseMode] = useState<Record<string, boolean>>({});
   const [purchaseQuantities, setPurchaseQuantities] = useState<Record<string, number>>({});
 
@@ -280,19 +280,16 @@ export default function Dashboard() {
       const current = prev[sweetId] || 1;
       if (current > 0) {
         const newQuantity = current - 1;
-        // If quantity reaches 0, exit purchase mode
         if (newQuantity === 0) {
           setPurchaseMode((prevMode) => {
             const newMode = { ...prevMode };
             delete newMode[sweetId];
             return newMode;
           });
-          // Remove the purchase quantity
           const newQuantities = { ...prev };
           delete newQuantities[sweetId];
           return newQuantities;
         }
-        // Decrease quantity normally
         return {
           ...prev,
           [sweetId]: newQuantity,
@@ -317,7 +314,6 @@ export default function Dashboard() {
       });
 
       if (response.ok) {
-        // Exit purchase mode
         setPurchaseMode((prev) => {
           const newMode = { ...prev };
           delete newMode[sweetId];
@@ -329,7 +325,6 @@ export default function Dashboard() {
           return newQuantities;
         });
         toast.success(`Successfully purchased ${quantity} ${sweet.name}!`);
-        // Refresh sweets list
         fetchSweets();
       } else {
         const error = await response.json();
@@ -391,161 +386,231 @@ export default function Dashboard() {
     }
   };
 
+  const totalProducts = sweets.length;
+  const totalValue = sweets.reduce((sum, sweet) => sum + (sweet.price * sweet.quantity), 0);
+  const lowStock = sweets.filter(sweet => sweet.quantity < 10 && sweet.quantity > 0).length;
+  const outOfStock = sweets.filter(sweet => sweet.quantity === 0).length;
+
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-[#FFE5E5]">
       <Toaster position="top-right" />
+      
       {/* Header */}
-      <header className="border-b bg-card">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+      <header className="sticky top-0 z-50 border-b-[3px] border-black bg-[#FFE66D]">
+        <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-2xl font-bold text-foreground">Shop Manager</h1>
-              <div className="flex items-center gap-2 mt-1">
-                <p className="text-sm text-muted-foreground">
-                  Welcome, {session?.user?.name || "User"}
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 border-[3px] border-black bg-[#FF6B6B] flex items-center justify-center neobrutalism-shadow-sm">
+                <Package className="h-7 w-7 text-white" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-black text-black">
+                  SHOP MANAGER
+                </h1>
+                <p className="text-sm font-bold text-black">
+                  {session?.user?.name || "USER"}
+                  {userRole && (
+                    <span className={`ml-2 px-3 py-1 border-[2px] border-black text-xs font-black ${
+                      userRole === "ADMIN" 
+                        ? "bg-[#FF6B6B] text-white"
+                        : "bg-[#4ECDC4] text-black"
+                    }`}>
+                      {userRole}
+                    </span>
+                  )}
                 </p>
-                {userRole && (
-                  <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
-                    userRole === "ADMIN" 
-                      ? "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300"
-                      : "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300"
-                  }`}>
-                    {userRole}
-                  </span>
-                )}
               </div>
             </div>
             <Button
               onClick={() => signOut()}
-              variant="destructive"
-              size="default"
+              variant="ghost"
+              size="sm"
+              className="border-0 text-black hover:bg-[#FF6B6B] hover:text-white font-black"
             >
               <LogOut className="mr-2 h-4 w-4" />
-              Sign Out
+              SIGN OUT
             </Button>
           </div>
         </div>
       </header>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Search Section */}
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Search className="h-5 w-5" />
-              Search Sweets
-            </CardTitle>
-            <CardDescription>
-              Filter sweets by name, category, or maximum price
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <Input
-                type="text"
-                placeholder="Name"
-                value={searchFilters.name}
-                onChange={(e) =>
-                  setSearchFilters({ ...searchFilters, name: e.target.value })
-                }
-              />
-              <Input
-                type="text"
-                placeholder="Category"
-                value={searchFilters.category}
-                onChange={(e) =>
-                  setSearchFilters({ ...searchFilters, category: e.target.value })
-                }
-              />
-              <Input
-                type="number"
-                placeholder="Max Price"
-                value={searchFilters.maxPrice}
-                onChange={(e) =>
-                  setSearchFilters({ ...searchFilters, maxPrice: e.target.value })
-                }
-              />
+      <div className="max-w-7xl mx-auto px-6 py-8">
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+          <Card className="border-[3px] border-black bg-white neobrutalism-shadow">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-bold text-black mb-1">TOTAL PRODUCTS</p>
+                  <p className="text-3xl font-black text-black">{totalProducts}</p>
+                </div>
+                <div className="w-14 h-14 border-[3px] border-black bg-[#45B7D1] flex items-center justify-center neobrutalism-shadow-sm">
+                  <Package className="h-7 w-7 text-white" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-[3px] border-black bg-white neobrutalism-shadow">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-bold text-black mb-1">TOTAL VALUE</p>
+                  <p className="text-3xl font-black text-black">₹{totalValue.toLocaleString()}</p>
+                </div>
+                <div className="w-14 h-14 border-[3px] border-black bg-[#4ECDC4] flex items-center justify-center neobrutalism-shadow-sm">
+                  <TrendingUp className="h-7 w-7 text-white" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-[3px] border-black bg-white neobrutalism-shadow">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-bold text-black mb-1">LOW STOCK</p>
+                  <p className="text-3xl font-black text-[#FFA07A]">{lowStock}</p>
+                </div>
+                <div className="w-14 h-14 border-[3px] border-black bg-[#FFE66D] flex items-center justify-center neobrutalism-shadow-sm">
+                  <TrendingUp className="h-7 w-7 text-black" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-[3px] border-black bg-white neobrutalism-shadow">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-bold text-black mb-1">OUT OF STOCK</p>
+                  <p className="text-3xl font-black text-[#FF6B6B]">{outOfStock}</p>
+                </div>
+                <div className="w-14 h-14 border-[3px] border-black bg-[#FF6B6B] flex items-center justify-center neobrutalism-shadow-sm">
+                  <Package className="h-7 w-7 text-white" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Search and Actions */}
+        <div className="flex flex-col md:flex-row gap-4 mb-6">
+          <Card className="flex-1 border-[3px] border-black bg-white neobrutalism-shadow">
+            <CardContent className="p-4">
               <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-black" />
+                  <Input
+                    type="text"
+                    placeholder="SEARCH BY NAME..."
+                    value={searchFilters.name}
+                    onChange={(e) =>
+                      setSearchFilters({ ...searchFilters, name: e.target.value })
+                    }
+                    className="pl-10 border-[3px] border-black bg-white font-bold"
+                  />
+                </div>
+                <Input
+                  type="text"
+                  placeholder="CATEGORY"
+                  value={searchFilters.category}
+                  onChange={(e) =>
+                    setSearchFilters({ ...searchFilters, category: e.target.value })
+                  }
+                  className="w-40 border-[3px] border-black bg-white font-bold"
+                />
+                <Input
+                  type="number"
+                  placeholder="MAX PRICE"
+                  value={searchFilters.maxPrice}
+                  onChange={(e) =>
+                    setSearchFilters({ ...searchFilters, maxPrice: e.target.value })
+                  }
+                  className="w-32 border-[3px] border-black bg-white font-bold"
+                />
                 <Button
                   onClick={handleSearch}
-                  className="flex-1"
-                  variant="default"
+                  className="bg-[#4ECDC4] text-black border-[3px] border-black font-black"
                 >
                   <Search className="mr-2 h-4 w-4" />
-                  Search
+                  SEARCH
                 </Button>
                 <Button
                   onClick={resetFilters}
                   variant="outline"
+                  size="icon"
+                  className="bg-white text-black border-[3px] border-black font-black"
                 >
-                  <X className="mr-2 h-4 w-4" />
-                  Reset
+                  <X className="h-4 w-4" />
                 </Button>
               </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
 
-        {/* Actions */}
-        <div className="mb-6 flex justify-between items-center">
-          <div>
-            <h2 className="text-2xl font-bold text-foreground flex items-center gap-2">
-              <Package className="h-6 w-6" />
-              Sweets Inventory
-            </h2>
-            <p className="text-sm text-muted-foreground mt-1">
-              Manage your sweets inventory
-            </p>
-          </div>
-          <Button
-            onClick={() => {
-              setEditingSweet(null);
-              setFormData({ name: "", category: "", price: "", quantity: "" });
-              setShowModal(true);
-            }}
-            size="lg"
-          >
-            <Plus className="mr-2 h-4 w-4" />
-            Add Sweet
-          </Button>
+          {userRole === "ADMIN" && (
+            <Button
+              onClick={() => {
+                setEditingSweet(null);
+                setFormData({ name: "", category: "", price: "", quantity: "" });
+                setShowModal(true);
+              }}
+              size="lg"
+              className="bg-[#FF6B6B] text-white border-[3px] border-black h-12 px-6 font-black"
+            >
+              <Plus className="mr-2 h-5 w-5" />
+              ADD PRODUCT
+            </Button>
+          )}
         </div>
 
-        {/* Sweets Table */}
-        <Card>
+        {/* Products Table */}
+        <Card className="border-[3px] border-black bg-white neobrutalism-shadow-lg">
+          <CardHeader>
+            <CardTitle className="text-2xl font-black text-black">
+              PRODUCTS INVENTORY
+            </CardTitle>
+            <CardDescription className="text-base font-bold text-black">
+              MANAGE YOUR SWEETS INVENTORY
+            </CardDescription>
+          </CardHeader>
           <CardContent className="p-0">
             {loading ? (
-              <div className="p-8 text-center flex flex-col items-center justify-center gap-2">
-                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-                <p className="text-muted-foreground">Loading sweets...</p>
+              <div className="p-16 text-center">
+                <Loader2 className="h-10 w-10 animate-spin text-[#FF6B6B] mx-auto mb-4" />
+                <p className="text-base font-bold text-black">LOADING PRODUCTS...</p>
               </div>
             ) : sweets.length === 0 ? (
-              <div className="p-8 text-center flex flex-col items-center justify-center gap-2">
-                <Package className="h-12 w-12 text-muted-foreground" />
-                <p className="text-muted-foreground">No sweets found</p>
-                <Button
-                  onClick={() => {
-                    setEditingSweet(null);
-                    setFormData({ name: "", category: "", price: "", quantity: "" });
-                    setShowModal(true);
-                  }}
-                  variant="outline"
-                  className="mt-2"
-                >
-                  <Plus className="mr-2 h-4 w-4" />
-                  Add Your First Sweet
-                </Button>
+              <div className="p-16 text-center">
+                <div className="w-24 h-24 border-[3px] border-black bg-[#FFE66D] flex items-center justify-center mx-auto mb-4 neobrutalism-shadow">
+                  <Package className="h-12 w-12 text-black" />
+                </div>
+                <p className="text-xl font-black text-black mb-2">NO PRODUCTS FOUND</p>
+                <p className="text-base font-bold text-black mb-6">GET STARTED BY ADDING YOUR FIRST PRODUCT</p>
+                {userRole === "ADMIN" && (
+                  <Button
+                    onClick={() => {
+                      setEditingSweet(null);
+                      setFormData({ name: "", category: "", price: "", quantity: "" });
+                      setShowModal(true);
+                    }}
+                    className="bg-[#FF6B6B] text-white border-[3px] border-black font-black"
+                  >
+                    <Plus className="mr-2 h-4 w-4" />
+                    ADD YOUR FIRST PRODUCT
+                  </Button>
+                )}
               </div>
             ) : (
               <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
-                    <TableRow>
-                      <TableHead>Name</TableHead>
-                      <TableHead>Category</TableHead>
-                      <TableHead>Price (INR)</TableHead>
-                      <TableHead>Quantity</TableHead>
-                      <TableHead className="text-right">Purchase</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
+                    <TableRow className="hover:bg-transparent border-b-[3px] border-black bg-[#FFE66D]">
+                      <TableHead className="font-black text-black">PRODUCT</TableHead>
+                      <TableHead className="font-black text-black">CATEGORY</TableHead>
+                      <TableHead className="font-black text-black">PRICE</TableHead>
+                      <TableHead className="font-black text-black">STOCK</TableHead>
+                      <TableHead className="text-right font-black text-black">ACTIONS</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -555,97 +620,104 @@ export default function Dashboard() {
                       const isOutOfStock = sweet.quantity === 0;
 
                       return (
-                        <TableRow key={sweet.id}>
-                          <TableCell className="font-medium">{sweet.name}</TableCell>
-                          <TableCell>{sweet.category}</TableCell>
-                          <TableCell>₹{sweet.price}</TableCell>
-                          <TableCell>{sweet.quantity}</TableCell>
+                        <TableRow 
+                          key={sweet.id}
+                          className="border-b-[2px] border-black hover:bg-[#FFE66D] transition-colors"
+                        >
+                          <TableCell className="font-bold text-black">{sweet.name.toUpperCase()}</TableCell>
+                          <TableCell className="font-bold text-black">{sweet.category.toUpperCase()}</TableCell>
+                          <TableCell className="font-black text-[#FF6B6B]">₹{sweet.price}</TableCell>
+                          <TableCell>
+                            <span className={`px-4 py-2 border-[2px] border-black text-xs font-black ${
+                              sweet.quantity === 0 
+                                ? "bg-[#FF6B6B] text-white"
+                                : sweet.quantity < 10
+                                ? "bg-[#FFE66D] text-black"
+                                : "bg-[#4ECDC4] text-black"
+                            }`}>
+                              {sweet.quantity} UNITS
+                            </span>
+                          </TableCell>
                           <TableCell className="text-right">
                             {isInPurchaseMode ? (
-                              <div className="flex flex-col items-end gap-2">
-                                <div className="flex items-center gap-2">
+                              <div className="flex items-center justify-end gap-2">
+                                <div className="flex items-center gap-2 border-[3px] border-black bg-[#FFE66D] px-3 py-1 neobrutalism-shadow-sm">
                                   <Button
-                                    variant="outline"
+                                    variant="ghost"
                                     size="icon"
                                     onClick={() => handleDecreaseQuantity(sweet.id)}
-                                    className="h-8 w-8"
+                                    className="h-7 w-7 border-0 hover:bg-[#FF6B6B] hover:text-white font-black"
                                     disabled={purchasing}
                                   >
                                     <Minus className="h-4 w-4" />
                                   </Button>
-                                  <span className="min-w-[2rem] text-center font-medium">
+                                  <span className="min-w-[2rem] text-center font-black text-black">
                                     {purchaseQty}
                                   </span>
                                   <Button
-                                    variant="outline"
+                                    variant="ghost"
                                     size="icon"
                                     onClick={() => handleIncreaseQuantity(sweet.id, sweet.quantity)}
                                     disabled={purchaseQty >= sweet.quantity || purchasing}
-                                    className="h-8 w-8"
+                                    className="h-7 w-7 border-0 hover:bg-[#4ECDC4] hover:text-black font-black"
                                   >
                                     <Plus className="h-4 w-4" />
                                   </Button>
                                 </div>
                                 <Button
                                   onClick={() => handlePurchaseConfirm(sweet.id)}
-                                  variant="default"
                                   size="sm"
                                   disabled={purchasing}
+                                  className="bg-[#4ECDC4] text-black border-[3px] border-black font-black"
                                 >
                                   {purchasing ? (
-                                    <>
-                                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                      Processing...
-                                    </>
+                                    <Loader2 className="h-4 w-4 animate-spin" />
                                   ) : (
-                                    <>
-                                      <Check className="mr-2 h-4 w-4" />
-                                      Confirm Purchase
-                                    </>
+                                    <Check className="h-4 w-4" />
                                   )}
                                 </Button>
                               </div>
                             ) : (
-                              <Button
-                                onClick={() => handlePurchaseClick(sweet.id)}
-                                variant="default"
-                                size="sm"
-                                disabled={isOutOfStock}
-                              >
-                                <ShoppingCart className="mr-2 h-4 w-4" />
-                                Purchase
-                              </Button>
+                              <div className="flex items-center justify-end gap-2">
+                                <Button
+                                  onClick={() => handlePurchaseClick(sweet.id)}
+                                  size="sm"
+                                  disabled={isOutOfStock}
+                                  className="bg-[#4ECDC4] text-black border-[3px] border-black font-black"
+                                >
+                                  <ShoppingCart className="mr-2 h-4 w-4" />
+                                  BUY
+                                </Button>
+                                {userRole === "ADMIN" && (
+                                  <>
+                                    <Button
+                                      onClick={() => openRestockDialog(sweet)}
+                                      variant="ghost"
+                                      size="sm"
+                                      className="border-0 text-black hover:bg-[#4ECDC4] hover:text-black font-black"
+                                    >
+                                      <ArrowUp className="h-4 w-4" />
+                                    </Button>
+                                    <Button
+                                      onClick={() => openEditModal(sweet)}
+                                      variant="ghost"
+                                      size="sm"
+                                      className="border-0 text-black hover:bg-[#FFE66D] hover:text-black font-black"
+                                    >
+                                      <Edit className="h-4 w-4" />
+                                    </Button>
+                                    <Button
+                                      onClick={() => openDeleteDialog(sweet)}
+                                      variant="ghost"
+                                      size="sm"
+                                      className="border-0 text-black hover:bg-[#FF6B6B] hover:text-white font-black"
+                                    >
+                                      <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                  </>
+                                )}
+                              </div>
                             )}
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <div className="flex items-center justify-end gap-2">
-                              <Button
-                                onClick={() => openRestockDialog(sweet)}
-                                variant="ghost"
-                                size="sm"
-                                className="text-green-600 hover:text-green-700 hover:bg-green-50"
-                              >
-                                <ArrowUp className="mr-2 h-4 w-4" />
-                                Restock
-                              </Button>
-                              <Button
-                                onClick={() => openEditModal(sweet)}
-                                variant="ghost"
-                                size="sm"
-                              >
-                                <Edit className="mr-2 h-4 w-4" />
-                                Edit
-                              </Button>
-                              <Button
-                                onClick={() => openDeleteDialog(sweet)}
-                                variant="ghost"
-                                size="sm"
-                                className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                              >
-                                <Trash2 className="mr-2 h-4 w-4" />
-                                Delete
-                              </Button>
-                            </div>
                           </TableCell>
                         </TableRow>
                       );
@@ -658,209 +730,70 @@ export default function Dashboard() {
         </Card>
       </div>
 
-      {/* Modal */}
+      {/* Modals */}
       <Dialog open={showModal} onOpenChange={setShowModal}>
-        <DialogContent
-          onClose={() => {
-            setShowModal(false);
-            setEditingSweet(null);
-            setFormData({ name: "", category: "", price: "", quantity: "" });
-          }}
-        >
+        <DialogContent className="border-[3px] border-black bg-white neobrutalism-shadow-lg">
           <DialogHeader>
-            <DialogTitle>
-              {editingSweet ? "Edit Sweet" : "Add New Sweet"}
-            </DialogTitle>
-            <DialogDescription>
-              {editingSweet
-                ? "Update the sweet details below."
-                : "Fill in the details to add a new sweet to your inventory."}
+            <DialogTitle className="text-2xl font-black text-black">{editingSweet ? "EDIT PRODUCT" : "ADD NEW PRODUCT"}</DialogTitle>
+            <DialogDescription className="text-base font-bold text-black">
+              {editingSweet ? "UPDATE THE PRODUCT DETAILS BELOW." : "FILL IN THE DETAILS TO ADD A NEW PRODUCT."}
             </DialogDescription>
           </DialogHeader>
-          <form
-            onSubmit={editingSweet ? handleUpdate : handleCreate}
-            className="space-y-4"
-          >
+          <form onSubmit={editingSweet ? handleUpdate : handleCreate} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="name">Name</Label>
-              <Input
-                id="name"
-                type="text"
-                value={formData.name}
-                onChange={(e) =>
-                  setFormData({ ...formData, name: e.target.value })
-                }
-                required={!editingSweet}
-                placeholder="Enter sweet name"
-              />
+              <Input id="name" type="text" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required={!editingSweet} placeholder="Enter product name" />
             </div>
             <div className="space-y-2">
               <Label htmlFor="category">Category</Label>
-              <Input
-                id="category"
-                type="text"
-                value={formData.category}
-                onChange={(e) =>
-                  setFormData({ ...formData, category: e.target.value })
-                }
-                required={!editingSweet}
-                placeholder="Enter category"
-              />
+              <Input id="category" type="text" value={formData.category} onChange={(e) => setFormData({ ...formData, category: e.target.value })} required={!editingSweet} placeholder="Enter category" />
             </div>
             <div className="space-y-2">
               <Label htmlFor="price">Price (INR)</Label>
-              <Input
-                id="price"
-                type="number"
-                value={formData.price}
-                onChange={(e) =>
-                  setFormData({ ...formData, price: e.target.value })
-                }
-                required={!editingSweet}
-                placeholder="Enter price"
-                min="0"
-              />
+              <Input id="price" type="number" value={formData.price} onChange={(e) => setFormData({ ...formData, price: e.target.value })} required={!editingSweet} placeholder="Enter price" min="0" />
             </div>
             <div className="space-y-2">
               <Label htmlFor="quantity">Quantity</Label>
-              <Input
-                id="quantity"
-                type="number"
-                value={formData.quantity}
-                onChange={(e) =>
-                  setFormData({ ...formData, quantity: e.target.value })
-                }
-                required={!editingSweet}
-                placeholder="Enter quantity"
-                min="0"
-              />
+              <Input id="quantity" type="number" value={formData.quantity} onChange={(e) => setFormData({ ...formData, quantity: e.target.value })} required={!editingSweet} placeholder="Enter quantity" min="0" />
             </div>
             <DialogFooter>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => {
-                  setShowModal(false);
-                  setEditingSweet(null);
-                  setFormData({ name: "", category: "", price: "", quantity: "" });
-                }}
-              >
-                Cancel
-              </Button>
-              <Button type="submit">
-                {editingSweet ? "Update" : "Create"}
-              </Button>
+              <Button type="button" variant="outline" onClick={() => { setShowModal(false); setEditingSweet(null); setFormData({ name: "", category: "", price: "", quantity: "" }); }} className="bg-white text-black border-[3px] border-black font-black">CANCEL</Button>
+              <Button type="submit" className="bg-[#FF6B6B] text-white border-[3px] border-black font-black">{editingSweet ? "UPDATE" : "CREATE"}</Button>
             </DialogFooter>
           </form>
         </DialogContent>
       </Dialog>
 
-      {/* Delete Confirmation Dialog */}
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <DialogContent
-          onClose={() => {
-            setDeleteDialogOpen(false);
-            setSweetToDelete(null);
-          }}
-        >
+        <DialogContent className="border-[3px] border-black bg-white neobrutalism-shadow-lg">
           <DialogHeader>
-            <DialogTitle>Delete Sweet</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to delete "{sweetToDelete?.name}"? This action
-              cannot be undone.
-            </DialogDescription>
+            <DialogTitle className="text-2xl font-black text-black">DELETE PRODUCT</DialogTitle>
+            <DialogDescription className="text-base font-bold text-black">ARE YOU SURE YOU WANT TO DELETE "{sweetToDelete?.name.toUpperCase()}"? THIS ACTION CANNOT BE UNDONE.</DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => {
-                setDeleteDialogOpen(false);
-                setSweetToDelete(null);
-              }}
-              disabled={deleting}
-            >
-              Cancel
-            </Button>
-            <Button
-              type="button"
-              variant="destructive"
-              onClick={handleDelete}
-              disabled={deleting}
-            >
-              {deleting ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Deleting...
-                </>
-              ) : (
-                <>
-                  <Trash2 className="mr-2 h-4 w-4" />
-                  Delete
-                </>
-              )}
+            <Button type="button" variant="outline" onClick={() => { setDeleteDialogOpen(false); setSweetToDelete(null); }} disabled={deleting} className="bg-white text-black border-[3px] border-black font-black">CANCEL</Button>
+            <Button type="button" variant="destructive" onClick={handleDelete} disabled={deleting} className="bg-[#FF6B6B] text-white border-[3px] border-black font-black">
+              {deleting ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> DELETING...</> : <><Trash2 className="mr-2 h-4 w-4" /> DELETE</>}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* Restock Dialog */}
       <Dialog open={restockDialogOpen} onOpenChange={setRestockDialogOpen}>
-        <DialogContent
-          onClose={() => {
-            setRestockDialogOpen(false);
-            setSweetToRestock(null);
-            setRestockQuantity("");
-          }}
-        >
+        <DialogContent className="border-[3px] border-black bg-white neobrutalism-shadow-lg">
           <DialogHeader>
-            <DialogTitle>Restock Sweet</DialogTitle>
-            <DialogDescription>
-              Enter the quantity to add to "{sweetToRestock?.name}". Current quantity: {sweetToRestock?.quantity}
-            </DialogDescription>
+            <DialogTitle className="text-2xl font-black text-black">RESTOCK PRODUCT</DialogTitle>
+            <DialogDescription className="text-base font-bold text-black">ENTER THE QUANTITY TO ADD TO "{sweetToRestock?.name.toUpperCase()}". CURRENT QUANTITY: {sweetToRestock?.quantity}</DialogDescription>
           </DialogHeader>
           <form onSubmit={handleRestock} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="restockQuantity">Quantity to Add</Label>
-              <Input
-                id="restockQuantity"
-                type="number"
-                value={restockQuantity}
-                onChange={(e) => setRestockQuantity(e.target.value)}
-                required
-                placeholder="Enter quantity"
-                min="1"
-                disabled={restocking}
-              />
+              <Input id="restockQuantity" type="number" value={restockQuantity} onChange={(e) => setRestockQuantity(e.target.value)} required placeholder="Enter quantity" min="1" disabled={restocking} />
             </div>
             <DialogFooter>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => {
-                  setRestockDialogOpen(false);
-                  setSweetToRestock(null);
-                  setRestockQuantity("");
-                }}
-                disabled={restocking}
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                disabled={restocking}
-              >
-                {restocking ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Restocking...
-                  </>
-                ) : (
-                  <>
-                    <ArrowUp className="mr-2 h-4 w-4" />
-                    Restock
-                  </>
-                )}
+              <Button type="button" variant="outline" onClick={() => { setRestockDialogOpen(false); setSweetToRestock(null); setRestockQuantity(""); }} disabled={restocking} className="bg-white text-black border-[3px] border-black font-black">CANCEL</Button>
+              <Button type="submit" disabled={restocking} className="bg-[#4ECDC4] text-black border-[3px] border-black font-black">
+                {restocking ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> RESTOCKING...</> : <><ArrowUp className="mr-2 h-4 w-4" /> RESTOCK</>}
               </Button>
             </DialogFooter>
           </form>
